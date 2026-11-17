@@ -580,9 +580,16 @@ render_builder_pdf_page <- function(
     page,
     dpi = BUILDER_RENDER_DPI
 ) {
-  output_file <- tempfile(
-    pattern = paste0("builder_page_", page, "_"),
-    fileext = ".png"
+  
+  output_pattern <- paste0(
+    tempfile(pattern = "builder_page_"),
+    "_%d.%s"
+  )
+  
+  output_file <- sprintf(
+    output_pattern,
+    as.integer(page),
+    "png"
   )
   
   on.exit(unlink(output_file, force = TRUE), add = TRUE)
@@ -592,7 +599,7 @@ render_builder_pdf_page <- function(
     format = "png",
     pages = as.integer(page),
     dpi = as.integer(dpi),
-    filenames = output_file,
+    filenames = output_pattern,
     verbose = FALSE
   )
   
@@ -1274,7 +1281,6 @@ app_theme <- bslib::bs_theme(
   bg = "#F7F7F7",
   fg = "#00274C",
   primary = "#00274C",
-  secondary = "#5A5A5A",
   success = "#2D6A4F",
   info = "#2F65A7",
   warning = "#FFCB05",
@@ -2819,6 +2825,12 @@ ui <- fluidPage(
 )
 
 server <- function(input, output, session) {
+  # Quit R when this browser session disconnects.
+  # Use only for a standalone, single-user local app.
+  session$onSessionEnded(function() {
+    shiny::stopApp()
+  })
+  
   builder_fields <- reactiveVal(empty_fields())
   builder_source_path <- reactiveVal(NULL)
   builder_source_name <- reactiveVal("")
