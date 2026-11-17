@@ -2,3 +2,7 @@
 .Rhistory
 .RData
 .Ruserdata
+www/*
+MDHHS EHS FORMS/*
+*.pdf
+.DS_Store
